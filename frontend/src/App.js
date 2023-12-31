@@ -1,14 +1,32 @@
 import "./App.css";
-import env from 'react-dotenv'
-
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "./auth/login";
+import Register from "./auth/register";
+import { AuthProvider, useAuth } from "./Common/auth-context";
+import { Home } from "./pages/home";
+import { useEffect } from "react";
 function App() {
-console.log("JWT KEY "+env.JWT_SECRET);
-console.log("BACKEND API URL "+env.BACKEND_API_URL);
+  const { state } = useAuth();
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
   return (
-    <div>
-      <h1> Hello {env.JWT_SECRET}</h1>
-    </div>
+    <Routes>
+      {!state.isAuthenticated ? (
+        <>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/*" element={<Navigate to="/login" />} />
+        </>
+      ) : (
+        <Route path="/" element={<Home />} />
+      )}
+    </Routes>
   );
 }
-
-export default App;
+const AppWithAuthProvider = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+export default AppWithAuthProvider;
